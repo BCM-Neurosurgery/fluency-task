@@ -1,0 +1,15 @@
+function setPath()
+%
+% add path to functions
+%
+
+% restoredefaultpath;
+
+
+% function for the trigger
+% addpath('C:\Program Files\MATLAB\R2020a\toolbox\fastportIO')
+
+% psychtoolbox 
+% if exist('Screen', 'file') == 0
+    % run 'C:\toolbox\Psychtoolbox\SetupPsychtoolbox.m'
+end
