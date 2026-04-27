@@ -5,27 +5,40 @@ function cfg = fluency_config()
 % struct at startup; no other file needs editing for routine changes.
 
 %% ── Hardware flags ───────────────────────────────────────────────────────
-cfg.use_blackrock  = true;   % send TaskComment / SendComment to Blackrock
+cfg.use_blackrock  = true;    % send TaskComment / cbmex comments to Blackrock
 cfg.use_photodiode = true;    % flash white square at every event marker
+
+%% ── Data output ──────────────────────────────────────────────────────────
+% Sessions are saved to:
+%   data_dir / {subject_id} / fluency / fluency_{timestamp} / mat /
+cfg.data_dir = 'C:\Users\EMU - Behavior\Documents\MATLAB\PatientData';
 
 %% ── Display ──────────────────────────────────────────────────────────────
 cfg.big_screen      = true;   % false → 800×600 window (for debugging)
+cfg.screen_number   = 1;      % PTB screen index (0 = primary, 1 = external)
 cfg.screen_size     = [520, 330];  % physical screen [width, height] in mm
 cfg.screen_distance = 910;         % eye-to-screen distance in mm
 
 %% ── Colors ───────────────────────────────────────────────────────────────
-cfg.colors.background = [128, 128, 128];
-cfg.colors.text       = [  0,   0,   0];
+cfg.colors.background = [128, 128, 128];  % grey noise / blank screen
+cfg.colors.banner     = [  0,   0,   0];  % black background for text overlays
+cfg.colors.text       = [255, 255, 255];  % white text on banners
 cfg.colors.diode_on   = [255, 255, 255];  % photodiode ON (white)
 
 %% ── Font ─────────────────────────────────────────────────────────────────
 cfg.font      = 'Courier';
-cfg.font_size = 24;
+cfg.font_size = 42;
 
 %% ── Response keys ────────────────────────────────────────────────────────
 cfg.wait_key  = 'w';        % advance / confirm key
-cfg.pause_key = 'p';        % pause mid-block
+cfg.pause_key = 'p';        % pause mid-block or mid-rest
 % Press Escape at any time to kill the task (sends TaskComment kill)
+
+%% ── Flow control ─────────────────────────────────────────────────────────
+% true  → show block info screen and wait for W before every block
+% false → advance automatically after the rest period, no key needed
+% Between runs: always requires W regardless of this flag.
+cfg.require_key_between_blocks = true;
 
 %% ── Audio ────────────────────────────────────────────────────────────────
 cfg.fs = 48000;             % audio sample rate (Hz)
@@ -55,14 +68,15 @@ cfg.num_blocks = [6, 6, 6, 6];   % blocks per run
 
 % Block recording duration (seconds) — defaults by type:
 %   semantic → 90 s,  numbers → 30 s
-cfg.block_duration = [90, 90, 30, 90];
+cfg.block_duration = [5, 90, 30, 90];
 
 % Rest between blocks within a run (seconds)
 %   semantic → 30 s,  numbers → 10 s
 cfg.rest_duration = [60, 60, 10, 60];
 
-% Rest between runs (seconds)
-cfg.run_rest_duration = 60;
+% Rest between runs (seconds) — length must equal cfg.num_runs - 1.
+% Entry i is the rest between run i and run i+1.
+cfg.run_rest_duration = [60, 60, 60];
 
 %% ── Metronome schedule ───────────────────────────────────────────────────
 % cfg.use_metronome{r}(b) = true/false for run r, block b.

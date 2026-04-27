@@ -16,8 +16,7 @@ ptb.sampleRate = cfg.fs;
 %% ── Screen ───────────────────────────────────────────────────────────────
 Screen('Preference', 'SkipSyncTests', 1);
 
-screens      = Screen('Screens');
-screenNumber = 1;   % use external monitor when available
+screenNumber = cfg.screen_number;   % set in fluency_config.m
 
 if cfg.big_screen
     [window, windowRect] = Screen('OpenWindow', screenNumber, cfg.colors.background);

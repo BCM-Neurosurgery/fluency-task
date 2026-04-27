@@ -4,14 +4,14 @@ function timings = run_block(ptb, cfg, stim, texture, blockDuration, useMetronom
 % The block displays the noise texture until blockDuration seconds of
 % *active* (non-paused) time have elapsed.
 %
-% Pause:    press P  →  freeze timer, show pause screen, wait for W
-% Kill:     press Escape  →  throw FluencyTask:killed
-% Metronome (if useMetronome): beep + photodiode every 1/metronome_frequency s
+%   P      → freeze timer, show full-screen PAUSED banner, wait for W
+%   Escape → throw FluencyTask:killed
+%   Metronome (if useMetronome): beep + photodiode every 1/metronome_frequency s
 
-timings          = struct();
-timings.pauses   = {};    % cell array of [pauseStart, pauseEnd] pairs
-timings.beats    = [];    % absolute timestamps of each metronome beat
-timings.blockStart = NaN;
+timings            = struct();
+timings.pauses     = {};
+timings.beats      = [];
+timings.blockStart = GetSecs();
 timings.blockEnd   = NaN;
 
 beatInterval = 1 / cfg.metronome_frequency;
@@ -23,25 +23,21 @@ Screen('Flip', ptb.window);
 %% ── Alert sound at block start ───────────────────────────────────────────
 play_sound(ptb, stim.alert_sound);
 
-blockStart = GetSecs();
-timings.blockStart = blockStart;
-
+blockStart = timings.blockStart;
+% timings.blockStart = blockStart;
 totalPaused  = 0;
-% First metronome beat fires after one full interval (not at t=0, which
-% is already marked by the alert sound and the block-start send_event).
 nextBeatTime = blockStart + beatInterval;
 
 %% ── Timing loop ──────────────────────────────────────────────────────────
 while true
 
-    now             = GetSecs();
+    now              = GetSecs();
     effectiveElapsed = (now - blockStart) - totalPaused;
 
     if effectiveElapsed >= blockDuration
         break;
     end
 
-    %% Check keyboard
     [kDown, ~, kCode] = KbCheck(-1);
 
     if kDown
@@ -56,27 +52,23 @@ while true
             KbReleaseWait(-1);
             pauseEntry = GetSecs();
 
-            % Draw pause screen over noise texture
-            Screen('DrawTexture', ptb.window, texture);
-            Screen('FillRect',    ptb.window, cfg.colors.background, ptb.center_band);
-            DrawFormattedText(ptb.window, 'PAUSED\n\nPress W to resume.', ...
-                'center', 'center', cfg.colors.text);
+            % Full-screen black PAUSED banner (no "Press W" on screen)
+            Screen('FillRect',    ptb.window, cfg.colors.banner);
+            DrawFormattedText(ptb.window, 'PAUSED', 'center', 'center', cfg.colors.text);
             Screen('Flip', ptb.window);
 
             send_event(ptb, cfg, 'task_pause');
 
-            % Redraw pause screen (send_event may have cleared it)
-            Screen('DrawTexture', ptb.window, texture);
-            Screen('FillRect',    ptb.window, cfg.colors.background, ptb.center_band);
-            DrawFormattedText(ptb.window, 'PAUSED\n\nPress W to resume.', ...
-                'center', 'center', cfg.colors.text);
+            Screen('FillRect',    ptb.window, cfg.colors.banner);
+            DrawFormattedText(ptb.window, 'PAUSED', 'center', 'center', cfg.colors.text);
             Screen('Flip', ptb.window);
 
-            ptb_waitkey(ptb);   % blocks until W (or throws on Escape)
+            fprintf('TASK PAUSED. Press W to resume.\n');
+            ptb_waitkey(ptb);
 
             pauseDur    = GetSecs() - pauseEntry;
             totalPaused = totalPaused + pauseDur;
-            nextBeatTime = nextBeatTime + pauseDur;   % shift beat schedule
+            nextBeatTime = nextBeatTime + pauseDur;
 
             timings.pauses{end+1} = [pauseEntry, pauseEntry + pauseDur];
 
@@ -93,7 +85,6 @@ while true
         play_sound(ptb, stim.metronome_sound);
         timings.beats(end+1) = GetSecs();
         send_event(ptb, cfg, 'metronome_proc', texture);
-        % send_event restores texture on OFF frame — no extra flip needed
         nextBeatTime = nextBeatTime + beatInterval;
     end
 
@@ -103,7 +94,7 @@ end % timing loop
 
 timings.blockEnd = GetSecs();
 
-%% Alert sound at block end
+%% ── Alert sound at block end ─────────────────────────────────────────────
 play_sound(ptb, stim.alert_sound);
 
 end
