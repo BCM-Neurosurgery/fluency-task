@@ -5,7 +5,7 @@ function cfg = fluency_config()
 % struct at startup; no other file needs editing for routine changes.
 
 %% ── Hardware flags ───────────────────────────────────────────────────────
-cfg.use_blackrock  = false;   % send TaskComment / SendComment to Blackrock
+cfg.use_blackrock  = true;   % send TaskComment / SendComment to Blackrock
 cfg.use_photodiode = true;    % flash white square at every event marker
 
 %% ── Display ──────────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ cfg.block_duration = [90, 90, 30, 90];
 
 % Rest between blocks within a run (seconds)
 %   semantic → 30 s,  numbers → 10 s
-cfg.rest_duration = [30, 30, 10, 30];
+cfg.rest_duration = [60, 60, 10, 60];
 
 % Rest between runs (seconds)
 cfg.run_rest_duration = 60;

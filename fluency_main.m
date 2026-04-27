@@ -50,7 +50,7 @@ try
 
     %% Task start marker
     if cfg.use_blackrock
-        TaskComment('start');
+        TaskComment('start', 'fluency');
     end
     fprintf('\n[Fluency Task]  Subject: %s\n', sub_id);
 
@@ -225,7 +225,7 @@ try
     Screen('Flip', ptb.window);
 
     if cfg.use_blackrock
-        TaskComment('stop');
+        TaskComment('stop', 'fluency');
     end
     send_event(ptb, cfg, 'task_complete');
 
@@ -240,13 +240,13 @@ catch ME
         killed = true;
         fprintf('\n*** Task killed by experimenter. ***\n');
         if cfg.use_blackrock
-            try; TaskComment('kill'); catch; end
+            try; TaskComment('kill', 'fluency'); catch; end
         end
         try; send_event(ptb, cfg, 'task_kill'); catch; end
     else
         fprintf('\n*** Task error: %s ***\n', ME.message);
         if cfg.use_blackrock
-            try; TaskComment('err'); catch; end
+            try; TaskComment('err', 'fluency'); catch; end
         end
         try; send_event(ptb, cfg, 'task_error'); catch; end
     end

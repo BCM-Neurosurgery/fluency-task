@@ -17,7 +17,7 @@ ptb.sampleRate = cfg.fs;
 Screen('Preference', 'SkipSyncTests', 1);
 
 screens      = Screen('Screens');
-screenNumber = max(screens);   % use external monitor when available
+screenNumber = 1;   % use external monitor when available
 
 if cfg.big_screen
     [window, windowRect] = Screen('OpenWindow', screenNumber, cfg.colors.background);
