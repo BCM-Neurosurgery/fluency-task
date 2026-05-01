@@ -209,27 +209,36 @@ try
         %% Run-end event
         send_event(ptb, cfg, sprintf('run_end_r%d', iRun));
 
-        %% Inter-run rest — interruptible, always requires W for next run
+        %% Inter-run rest — noise + instructions, interruptible
         if iRun < cfg.num_runs
             thisRunRest = cfg.run_rest_duration(iRun);
-            runRestMsg  = sprintf('Run %d of %d complete.\n\nResting...', iRun, cfg.num_runs);
+            restMsg     = sprintf('Run %d of %d complete  —  %d s rest\n\n%s', ...
+                iRun, cfg.num_runs, thisRunRest, rest_instructions());
 
-            Screen('FillRect', ptb.window, cfg.colors.banner);
-            DrawFormattedText(ptb.window, runRestMsg, 'center', 'center', cfg.colors.text);
+            % Generate a fresh noise texture for the inter-run rest
+            restTexture = make_noise_texture(ptb, cfg);
+
+            Screen('DrawTexture', ptb.window, restTexture);
+            Screen('FillRect',    ptb.window, cfg.colors.banner, ptb.center_band);
+            DrawFormattedText(ptb.window, restMsg, 'center', 'center', cfg.colors.text);
             Screen('Flip', ptb.window);
-            send_event(ptb, cfg, sprintf('run_rest_r%d', iRun));
-            Screen('FillRect', ptb.window, cfg.colors.banner);
-            DrawFormattedText(ptb.window, runRestMsg, 'center', 'center', cfg.colors.text);
+            send_event(ptb, cfg, sprintf('run_rest_r%d', iRun), restTexture);
+            Screen('DrawTexture', ptb.window, restTexture);
+            Screen('FillRect',    ptb.window, cfg.colors.banner, ptb.center_band);
+            DrawFormattedText(ptb.window, restMsg, 'center', 'center', cfg.colors.text);
             Screen('Flip', ptb.window);
 
-            % Text for 5 s — restore black banner+text if paused
-            wait_interruptible(ptb, cfg, min(5, thisRunRest), [], runRestMsg);
+            % Text phase: first 5 s (pause → restores noise + text)
+            wait_interruptible(ptb, cfg, min(5, thisRunRest), restTexture, restMsg);
+
+            % Static phase: remainder (pause → restores just noise)
             if thisRunRest > 5
-                Screen('FillRect', ptb.window, cfg.colors.background);
+                Screen('DrawTexture', ptb.window, restTexture);
                 Screen('Flip', ptb.window);
-                % Grey for remainder — restore grey if paused
-                wait_interruptible(ptb, cfg, thisRunRest - 5);
+                wait_interruptible(ptb, cfg, thisRunRest - 5, restTexture);
             end
+
+            Screen('Close', restTexture);
         end
 
     end % iRun
@@ -278,11 +287,12 @@ ptb_close();
 fprintf('Session saved to: %s\n', subjDir);
 
 
-%% ── Local helper: rest screen ────────────────────────────────────────────
+%% ── Local helpers ────────────────────────────────────────────────────────
 function show_rest_screen(ptb, cfg, texture, restDur, iRun, iBlock)
-% Display rest screen: text banner for 5 s then blank grey.
-% Fully interruptible (P = pause, Escape = kill).
-restMsg = sprintf('Rest\n%d seconds', restDur);
+% Display rest screen: text banner for 5 s then pure noise static.
+% Fully interruptible at all times (P = pause, Escape = kill).
+restMsg = sprintf('Block %d of %d complete  —  %d s rest\n\n%s', ...
+    iBlock, cfg.num_blocks(iRun), restDur, rest_instructions());
 
 Screen('DrawTexture', ptb.window, texture);
 Screen('FillRect',    ptb.window, cfg.colors.banner, ptb.center_band);
@@ -291,19 +301,24 @@ Screen('Flip', ptb.window);
 
 send_event(ptb, cfg, sprintf('rest_start_r%d_b%d', iRun, iBlock), texture);
 
-% Redraw after diode flash
 Screen('DrawTexture', ptb.window, texture);
 Screen('FillRect',    ptb.window, cfg.colors.banner, ptb.center_band);
 DrawFormattedText(ptb.window, restMsg, 'center', 'center', cfg.colors.text);
 Screen('Flip', ptb.window);
 
-% Hold text for up to 5 s — restore noise+banner+text if paused
+% Text phase: first 5 s (pause → restores noise + text)
 wait_interruptible(ptb, cfg, min(5, restDur), texture, restMsg);
 
-% Blank grey for remainder — restore grey if paused
+% Static phase: remainder (pause → restores just noise)
 if restDur > 5
-    Screen('FillRect', ptb.window, cfg.colors.background);
+    Screen('DrawTexture', ptb.window, texture);
     Screen('Flip', ptb.window);
-    wait_interruptible(ptb, cfg, restDur - 5);
+    wait_interruptible(ptb, cfg, restDur - 5, texture);
 end
+end
+
+function msg = rest_instructions()
+msg = ['Please stay still\n' ...
+       'Keep your eyes on the screen\n' ...
+       'and try not to speak'];
 end

@@ -5,7 +5,7 @@ function cfg = fluency_config()
 % struct at startup; no other file needs editing for routine changes.
 
 %% ── Hardware flags ───────────────────────────────────────────────────────
-cfg.use_blackrock  = true;    % send TaskComment / cbmex comments to Blackrock
+cfg.use_blackrock  = false;    % send TaskComment / cbmex comments to Blackrock
 cfg.use_photodiode = true;    % flash white square at every event marker
 
 %% ── Data output ──────────────────────────────────────────────────────────
@@ -64,19 +64,19 @@ cfg.semantic_prompts = {
 %% ── Per-run parameters ───────────────────────────────────────────────────
 % All arrays are indexed by run number (length must equal cfg.num_runs).
 
-cfg.num_blocks = [6, 6, 6, 6];   % blocks per run
+cfg.num_blocks = [2, 6, 6, 6];   % blocks per run
 
 % Block recording duration (seconds) — defaults by type:
 %   semantic → 90 s,  numbers → 30 s
-cfg.block_duration = [5, 90, 30, 90];
+cfg.block_duration = [10, 90, 30, 90];
 
 % Rest between blocks within a run (seconds)
-%   semantic → 30 s,  numbers → 10 s
-cfg.rest_duration = [60, 60, 10, 60];
+%   semantic → 60 s,  numbers → 10 s
+cfg.rest_duration = [10, 60, 30, 60];
 
 % Rest between runs (seconds) — length must equal cfg.num_runs - 1.
 % Entry i is the rest between run i and run i+1.
-cfg.run_rest_duration = [60, 60, 60];
+cfg.run_rest_duration = [60, 60, 30];
 
 %% ── Metronome schedule ───────────────────────────────────────────────────
 % cfg.use_metronome{r}(b) = true/false for run r, block b.
