@@ -5,7 +5,7 @@ function cfg = fluency_config()
 % struct at startup; no other file needs editing for routine changes.
 
 %% ── Hardware flags ───────────────────────────────────────────────────────
-cfg.use_blackrock  = false;    % send TaskComment / cbmex comments to Blackrock
+cfg.use_blackrock  = true;    % send TaskComment / cbmex comments to Blackrock
 cfg.use_photodiode = true;    % flash white square at every event marker
 
 %% ── Data output ──────────────────────────────────────────────────────────
@@ -51,32 +51,37 @@ cfg.metronome_frequency = 0.5;   % Hz  →  one beat every 2 s
 
 %% ── Run structure ────────────────────────────────────────────────────────
 % run_types: 'semantic' or 'numbers'
-cfg.num_runs  = 4;
-cfg.run_types = {'semantic', 'semantic', 'numbers', 'semantic'};
+cfg.num_runs  = 9;
+cfg.run_types = {'semantic', 'semantic', 'semantic', 'semantic', 'semantic', 'semantic', 'semantic', 'number'};
 
 % Prompts for semantic runs, assigned in order of appearance
 cfg.semantic_prompts = {
-    'animals', ...
     'professions', ...
-    'things that are easier said than done'
+    'animals', ...
+    'things to sell in a garage sale', ...
+    'things to pack in your suitcase for a trip to Hawaii', ...
+    'things that keep you warm on a cold winter day', ...
+    'things you would give as a present to a child', ...
+    'good vacation spots for july', ...
+    'things to save if your house was on fire' ...
 };
 
 %% ── Per-run parameters ───────────────────────────────────────────────────
 % All arrays are indexed by run number (length must equal cfg.num_runs).
 
-cfg.num_blocks = [2, 6, 6, 6];   % blocks per run
+cfg.num_blocks = [6, 6, 1, 1, 1, 1, 1, 1, 6];   % blocks per run
 
 % Block recording duration (seconds) — defaults by type:
 %   semantic → 90 s,  numbers → 30 s
-cfg.block_duration = [10, 90, 30, 90];
+cfg.block_duration = [90, 90, 90, 90, 90, 90, 90, 90, 30];
 
 % Rest between blocks within a run (seconds)
 %   semantic → 60 s,  numbers → 10 s
-cfg.rest_duration = [10, 60, 30, 60];
+cfg.rest_duration = [60, 60, 60, 60, 60, 60, 60, 60, 30];
 
 % Rest between runs (seconds) — length must equal cfg.num_runs - 1.
 % Entry i is the rest between run i and run i+1.
-cfg.run_rest_duration = [60, 60, 30];
+cfg.run_rest_duration = [60, 60, 60, 60, 60, 60, 60, 60];
 
 %% ── Metronome schedule ───────────────────────────────────────────────────
 % cfg.use_metronome{r}(b) = true/false for run r, block b.
